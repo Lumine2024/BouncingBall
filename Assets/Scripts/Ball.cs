@@ -4,6 +4,15 @@ using UnityEngine;
 
 public class Ball : MonoBehaviour
 {
+    private const float DefaultSpeed = 540f;
+
+    [SerializeField]
+    private float speed = DefaultSpeed;
+    [SerializeField]
+    private float maxBounceAngle = 75f;
+    [SerializeField]
+    private float railVelocityInfluence = 0.35f;
+
     Rigidbody2D rb;
     private Vector2 velocity;
     public GameManager gameManager;
@@ -12,28 +21,28 @@ public class Ball : MonoBehaviour
     {
         rb = GetComponent<Rigidbody2D>();
 
-        // Ê¹ÓÃ Dynamic ¸ÕÌå²¢Í¨¹ý velocity Çý¶¯ÎïÀíÏìÓ¦
+        // Ê¹ï¿½ï¿½ Dynamic ï¿½ï¿½ï¿½å²¢Í¨ï¿½ï¿½ velocity ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ó¦
         rb.isKinematic = false;
         rb.gravityScale = 0f;
         rb.freezeRotation = true;
-        rb.collisionDetectionMode = CollisionDetectionMode2D.Continuous; // ½µµÍ¸ßËÙ´©Í¸
+        rb.collisionDetectionMode = CollisionDetectionMode2D.Continuous; // ï¿½ï¿½ï¿½Í¸ï¿½ï¿½Ù´ï¿½Í¸
 
-        // ÎÒÃÇÎ¬»¤Ò»¸ö¶ÀÁ¢µÄ velocity ×Ö¶Î£¬×÷Îª¡°È¨ÍþÖµ¡±
+        // ï¿½ï¿½ï¿½ï¿½Î¬ï¿½ï¿½Ò»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ velocity ï¿½Ö¶Î£ï¿½ï¿½ï¿½Îªï¿½ï¿½È¨ï¿½ï¿½Öµï¿½ï¿½
         velocity = new Vector2(0f, -1.0f);
-        rb.velocity = velocity * 540;
+        ApplyVelocity();
     }
 
     // Reset logic removed: levels are instantiated fresh instead of resetting objects
 
-    // ÔÚÎïÀíÒýÇæµÄÅö×²»Øµ÷ÀïÁ¢¼´»Ö¸´ÎÒÃÇµÄËÙ¶È£¬·ÀÖ¹ÒýÇæµÄÅö×²ÏìÓ¦¸Ä±äËü
+    // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½×²ï¿½Øµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö¸ï¿½ï¿½ï¿½ï¿½Çµï¿½ï¿½Ù¶È£ï¿½ï¿½ï¿½Ö¹ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½×²ï¿½ï¿½Ó¦ï¿½Ä±ï¿½ï¿½ï¿½
     private void OnCollisionEnter2D(Collision2D coll)
     {
-        rb.velocity = velocity * 540;
+        ApplyVelocity();
     }
 
     private void OnCollisionStay2D(Collision2D coll)
     {
-        rb.velocity = velocity * 540;
+        ApplyVelocity();
     }
 
     public void OnCollideWall(int index) {
@@ -48,18 +57,38 @@ public class Ball : MonoBehaviour
             default:
                 throw new System.Exception("unexpected wall index!");
         }
-        velocity = v;
-        rb.velocity = velocity * 540;
+        SetVelocity(v);
     }
 
-    public void OnCollideRail(Vector2 railVelocity) {
-        var v = velocity;
-        v = new Vector2(railVelocity.x * 0.8f + v.x * 0.2f, -v.y);
-        velocity = v;
-        rb.velocity = velocity * 540;
+    public void OnCollideRail(Collision2D coll, Vector2 railVelocity) {
+        var railCollider = coll.collider;
+        var contact = coll.GetContact(0);
+        var railBounds = railCollider.bounds;
+        var halfWidth = railBounds.size.x / 2f;
+        var offset = halfWidth > Mathf.Epsilon
+            ? (contact.point.x - railBounds.center.x) / halfWidth
+            : 0f;
+        offset = Mathf.Clamp(offset + railVelocity.x * railVelocityInfluence, -1f, 1f);
+        var angle = offset * maxBounceAngle * Mathf.Deg2Rad;
+        var v = new Vector2(Mathf.Sin(angle), Mathf.Cos(angle));
+        SetVelocity(v);
     }
     public void OnCollideBlock(int index) {
         OnCollideWall(1 ^ index);
     }
 
+    private void ApplyVelocity()
+    {
+        rb.velocity = velocity.normalized * speed;
+    }
+
+    private void SetVelocity(Vector2 newVelocity)
+    {
+        if (newVelocity == Vector2.zero) {
+            return;
+        }
+
+        velocity = newVelocity.normalized;
+        ApplyVelocity();
+    }
 }
