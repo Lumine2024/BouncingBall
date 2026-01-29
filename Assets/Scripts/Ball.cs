@@ -62,14 +62,19 @@ public class Ball : MonoBehaviour
 
     public void OnCollideRail(Collision2D coll, Vector2 railVelocity) {
         var railCollider = coll.collider;
+        if (coll.contactCount == 0 || railCollider == null) {
+            SetVelocity(new Vector2(velocity.x, Mathf.Abs(velocity.y)));
+            return;
+        }
+
         var contact = coll.GetContact(0);
         var railBounds = railCollider.bounds;
         var halfWidth = railBounds.size.x / 2f;
-        var offset = halfWidth > Mathf.Epsilon
+        var contactOffset = halfWidth > Mathf.Epsilon
             ? (contact.point.x - railBounds.center.x) / halfWidth
             : 0f;
-        offset = Mathf.Clamp(offset + railVelocity.x * railVelocityInfluence, -1f, 1f);
-        var angle = offset * maxBounceAngle * Mathf.Deg2Rad;
+        var angleOffset = Mathf.Clamp(contactOffset + railVelocity.x * railVelocityInfluence, -1f, 1f);
+        var angle = angleOffset * maxBounceAngle * Mathf.Deg2Rad;
         var v = new Vector2(Mathf.Sin(angle), Mathf.Cos(angle));
         SetVelocity(v);
     }
@@ -79,7 +84,7 @@ public class Ball : MonoBehaviour
 
     private void ApplyVelocity()
     {
-        rb.velocity = velocity.normalized * speed;
+        rb.velocity = velocity * speed;
     }
 
     private void SetVelocity(Vector2 newVelocity)
