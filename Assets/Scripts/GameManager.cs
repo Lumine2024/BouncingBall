@@ -52,7 +52,7 @@ public class GameManager : MonoBehaviour
         CheckWinCondition();
     }
     public void OnBallCollideRail(Collision2D coll) {
-        ball.OnCollideRail(rail.Velocity);
+        ball.OnCollideRail(coll, rail.Velocity);
     }
     public void OnBallOutofBound(Collision2D coll) {
         Destroy(ball.gameObject);
