@@ -1,12 +1,15 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Net;
 using UnityEngine;
 
 public class Rail : MonoBehaviour
 {
     private Vector2 velocity;
     public GameManager gameManager;
-
+    bool initedBall = false;
+    [SerializeField]
+    private GameObject ballPrefab;
     
 
     public Vector2 Velocity {
@@ -33,6 +36,13 @@ public class Rail : MonoBehaviour
             //velocity = Vector2.right;
         } else {
             velocity = Vector2.zero;
+        }
+        if(Input.GetKey(KeyCode.G)) {
+            if (!initedBall) {
+                initedBall = true;
+                var ballObj = Instantiate(ballPrefab, transform.position + Vector3.up * 180, new Quaternion());
+                gameManager.OnInitBall(ballObj.GetComponent<Ball>());
+            }
         }
     }
 

@@ -22,10 +22,4 @@ public class ScoreManager : MonoBehaviour
         text.text = $"Score: {score}";
     }
 
-    public void ResetScore()
-    {
-        score = 0;
-        if (text == null) text = GetComponent<Text>();
-        if (text != null) text.text = $"Score: {score}";
-    }
 }

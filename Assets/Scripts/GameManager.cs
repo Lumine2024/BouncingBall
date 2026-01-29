@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class GameManager : MonoBehaviour
 {
-    [SerializeField]
+    //[SerializeField]
     private Ball ball;
     [SerializeField]
     private List<Block> blocks;
@@ -21,7 +21,7 @@ public class GameManager : MonoBehaviour
 
     void Start()
     {
-        ball.gameManager = this;
+        //ball.gameManager = this;
         foreach (var block in blocks) {
             block.gameManager = this;
         }
@@ -36,7 +36,10 @@ public class GameManager : MonoBehaviour
             // levelManager is optional; it will call LoadLevel on Start from UI
         }
     }
-
+    public void OnInitBall(Ball ball) {
+        this.ball = ball;
+        ball.gameManager = this;
+    }
     public Ball GetBall() { return ball; }
     public ScoreManager GetScoreManager() { return scoreManager; }
     public void SetLevelManager(LevelManager lm) { levelManager = lm; }
@@ -52,7 +55,7 @@ public class GameManager : MonoBehaviour
         CheckWinCondition();
     }
     public void OnBallCollideRail(Collision2D coll) {
-        ball.OnCollideRail(coll, rail.Velocity);
+        ball.OnCollideRail(rail.Velocity);
     }
     public void OnBallOutofBound(Collision2D coll) {
         Destroy(ball.gameObject);
@@ -68,11 +71,5 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    // Retained for compatibility: when using prefab-per-level the LevelManager will instantiate a fresh
-    // GameManager prefab. This LoadLevel no longer attempts to reset individual objects.
-    public void LoadLevel(int index)
-    {
-        if (scoreManager != null) scoreManager.ResetScore();
-    }
 
 }

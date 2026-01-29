@@ -147,6 +147,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 590a4dcd85ba617468d67b4f972543f9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  gameManager: {fileID: 0}
+  ballPrefab: {fileID: 8243485281634130931, guid: f2f49dceb282fe64491f38a63f77f416, type: 3}
 --- !u!50 &3006420273957852609
 Rigidbody2D:
   serializedVersion: 4
